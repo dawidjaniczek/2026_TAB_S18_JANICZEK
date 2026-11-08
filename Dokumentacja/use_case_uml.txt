@@ -1,0 +1,70 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Użytkownik" as U
+actor "Instruktor" as I
+actor "Administrator" as A
+
+U <|-- I
+U <|-- A
+
+rectangle "System Szkółki Pływackiej" {
+  ' --- wspólne ---
+  usecase "Zaloguj się" as UC1
+  usecase "Aktualizuj dane użytkownika" as UC2
+
+  ' --- Instruktor ---
+  usecase "Zarządzaj rezerwacjami\n(utwórz, odwołaj, zmień termin)" as UC3
+  usecase "Śledź stan karnetu i postępy" as UC4
+  usecase "Sprawdź obecność\n(rozlicz wejścia)" as UC5
+  usecase "Zarządzaj własną dyspozycyjnością" as UC6
+  usecase "Przeglądaj harmonogram zajęć" as UC7
+  usecase "Zarządzaj grupami\n(dodaj, edytuj, usuń)" as UC8
+  usecase "Zarządzaj przypisaniem do grup\n(zapisz, zrezygnuj)" as UC9
+  usecase "Zarządzaj harmonogramem zajęć" as UC10
+
+  ' --- Instruktor i Administrator ---
+  usecase "Zarządzaj kartoteką klientów\n(dodaj, edytuj, dezaktywuj)" as UC11
+
+  ' --- Administrator ---
+  usecase "Zarządzaj karnetami\n(zamroź, przedłuż)" as UC12
+  usecase "Zarządzaj stawkami instruktorów" as UC13
+  usecase "Zarządzaj kwalifikacjami instruktorów" as UC14
+  usecase "Generuj listy płac" as UC15
+  usecase "Zarządzaj obiektami i torami basenowymi" as UC16
+  usecase "Zarządzaj umowami" as UC17
+  usecase "Zarządzaj kontami użytkowników" as UC18
+
+  ' --- include ---
+  usecase "Sprawdź kwalifikacje instruktora" as UC19
+  usecase "Sprawdź dostępność instruktora" as UC20
+  usecase "Sprawdź dostępność toru" as UC21
+
+  UC10 .> UC19 : <<include>>
+  UC10 .> UC20 : <<include>>
+  UC10 .> UC21 : <<include>>
+}
+
+U -- UC1
+U -- UC2
+
+I -- UC3
+I -- UC4
+I -- UC5
+I -- UC6
+I -- UC7
+I -- UC8
+I -- UC9
+I -- UC10
+I -- UC11
+
+A -- UC11
+A -- UC12
+A -- UC13
+A -- UC14
+A -- UC15
+A -- UC16
+A -- UC17
+A -- UC18
+@enduml

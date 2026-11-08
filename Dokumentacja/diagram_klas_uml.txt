@@ -1,0 +1,240 @@
+@startuml
+skinparam classAttributeIconSize 0
+skinparam monochrome false
+skinparam packageStyle rectangle
+
+enum StaffRole {
+  ADMIN
+  RECEPTION
+}
+
+enum ClientStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum SkillLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  PRO
+}
+
+enum SkillCategory {
+  SWIMMING_TECHNIQUE
+  INSTRUCTOR_QUALIFICATION
+}
+
+enum LessonType {
+  INDIVIDUAL
+  SEMI_INDIVIDUAL
+  GROUP
+  AQUAAEROBICS
+  SPECIAL_EVENT
+}
+
+enum PassStatus {
+  ACTIVE
+  FROZEN
+  EXPIRED
+  EXHAUSTED
+}
+
+enum BookingStatus {
+  BOOKED
+  ATTENDED
+  CANCELLED_ON_TIME
+  NO_SHOW
+  RESCHEDULED
+}
+
+enum MembershipStatus {
+  WAITLISTED
+  ACTIVE
+  RESIGNED
+  COMPLETED
+}
+
+abstract class User {
+  #id: UUID
+  #email: String
+  #passwordHash: String
+  #firstName: String
+  #lastName: String
+  #phone: String
+  +getFullName(): String
+  +updateContactInfo(email: String, phone: String): void
+}
+
+class StaffMember {
+  -staffRole: StaffRole
+  +hasAdminPrivileges(): Boolean
+}
+
+class Client {
+  -id: UUID
+  -firstName: String
+  -lastName: String
+  -email: String
+  -phone: String
+  -birthDate: LocalDate
+  -skillLevel: SkillLevel
+  -status: ClientStatus
+  +isMinor(): Boolean
+  +getActivePass(): Pass
+  +addMasteredSkill(skill: Skill): void
+}
+
+class Guardian {
+  -id: UUID
+  -firstName: String
+  -lastName: String
+  -phone: String
+  -email: String
+  +signContractForMinor(contract: ContractDocument): void
+}
+
+class Instructor {
+  -ratesByLessonType: Map<LessonType, BigDecimal>
+  +getRateForType(type: LessonType): BigDecimal
+  +setRateForType(type: LessonType, rate: BigDecimal): void
+  +addQualification(qualification: InstructorQualification): void
+  +hasQualificationFor(type: LessonType): Boolean
+  +getMonthlySchedule(month: Integer, year: Integer): List<LessonSession>
+}
+
+class InstructorQualification {
+  -id: UUID
+  -lessonType: LessonType
+  -skillLevel: SkillLevel
+  -validFrom: LocalDate
+  -validUntil: LocalDate
+  +isValidOn(date: LocalDate): Boolean
+}
+
+class Skill {
+  -id: UUID
+  -code: String
+  -name: String
+  -category: SkillCategory
+  -description: String
+  +getName(): String
+}
+
+class InstructorAvailability {
+  -id: UUID
+  -date: LocalDate
+  -startTime: LocalTime
+  -endTime: LocalTime
+  -isAvailable: Boolean
+  +overlapsWith(start: LocalDateTime, durationMinutes: SmallInt): Boolean
+  +markUnavailable(): void
+}
+
+class Facility {
+  -id: UUID
+  -name: String
+  -address: String
+  -city: String
+}
+
+class SwimGroup {
+  -id: UUID
+  -name: String
+  -targetSkillLevel: SkillLevel
+  -minAge: Integer
+  -maxAge: Integer
+  -maxParticipants: Integer
+  +checkAvailableSpots(): Integer
+  +isAgeEligible(age: Integer): Boolean
+}
+
+class GroupMembership {
+  -id: UUID
+  -joinedAt: LocalDate
+  -leftAt: LocalDate
+  -status: MembershipStatus
+  +activateMembership(): void
+  +resign(): void
+}
+
+class LessonSession {
+  -id: UUID
+  -startTime: LocalDateTime
+  -durationMinutes: SmallInt
+  -type: LessonType
+  -isCancelled: Boolean
+  +hasConflict(): Boolean
+  +cancelSession(): void
+}
+
+class Booking {
+  -id: UUID
+  -bookedAt: LocalDateTime
+  -status: BookingStatus
+  +cancelBooking(): Boolean
+  +reschedule(newSession: LessonSession): Booking
+  +markAttendance(present: Boolean): void
+  +deductPassOnAttendance(): Boolean
+}
+
+class Pass {
+  -id: UUID
+  -totalLessons: Integer
+  -usedLessons: Integer
+  -validFrom: LocalDate
+  -validUntil: LocalDate
+  -status: PassStatus
+  +getCounterDisplay(): String
+  +consumeLesson(): Boolean
+  +freezePass(days: Integer): void
+  +extendValidity(newDate: LocalDate): void
+}
+
+class ContractDocument {
+  -id: UUID
+  -title: String
+  -templateUrl: String
+  -signedFileUrl: String
+  -isSigned: Boolean
+  -generatedAt: LocalDateTime
+  +generatePdf(): File
+  +markAsSigned(fileUrl: String): void
+}
+
+' Inheritance
+User <|-- Instructor
+User <|-- StaffMember
+
+' Lifecycle ownership
+Client "1" *-- "0..*" ContractDocument : owns >
+Instructor "1" *-- "0..*" InstructorAvailability : defines >
+
+' Client and guardian relationships
+Client "0..1" --> "0..*" Guardian : has guardian >
+Guardian "0..1" <-- "0..*" ContractDocument : signs for minor <
+
+' Skills and qualifications
+Client "0..*" --> "0..*" Skill : mastered skills >
+Instructor "1" *-- "0..*" InstructorQualification : holds >
+InstructorQualification "0..*" --> "1" Skill : based on >
+InstructorQualification "0..*" --> "1" LessonType : for lesson type >
+
+' Group membership history
+Client "1" --> "0..*" GroupMembership : membership history >
+SwimGroup "1" <-- "0..*" GroupMembership : includes <
+
+' Lessons, bookings, and passes
+Client "1" <-- "0..*" Booking : makes <
+LessonSession "1" <-- "0..*" Booking : refers to <
+Pass "0..1" <-- "0..*" Booking : uses pass <
+Client "1" <-- "0..*" Pass : owns <
+
+' Scheduling and facilities
+Instructor "0..*" <-- "1" SwimGroup : leads <
+Instructor "0..*" <-- "1" LessonSession : teaches <
+Facility "0..*" <-- "1" LessonSession : takes place at <
+SwimGroup "0..1" <-- "0..*" LessonSession : scheduled for <
+
+@enduml
