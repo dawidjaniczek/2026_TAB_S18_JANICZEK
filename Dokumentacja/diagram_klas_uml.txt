@@ -21,9 +21,16 @@ enum SkillLevel {
   PRO
 }
 
-enum SkillCategory {
+enum ClientSkillCategory {
   SWIMMING_TECHNIQUE
-  INSTRUCTOR_QUALIFICATION
+  WATER_SAFETY
+  ENDURANCE
+}
+
+enum InstructorSkillCategory {
+  CERTIFICATION
+  SPECIALIZATION
+  LIFESAVING
 }
 
 enum LessonType {
@@ -83,7 +90,7 @@ class Client {
   -status: ClientStatus
   +isMinor(): Boolean
   +getActivePass(): Pass
-  +addMasteredSkill(skill: Skill): void
+  +addMasteredSkill(skill: ClientSkill): void
 }
 
 class Guardian {
@@ -104,6 +111,15 @@ class Instructor {
   +getMonthlySchedule(month: Integer, year: Integer): List<LessonSession>
 }
 
+class InstructorSkill {
+  -id: UUID
+  -code: String
+  -name: String
+  -category: InstructorSkillCategory
+  -description: String
+  +getName(): String
+}
+
 class InstructorQualification {
   -id: UUID
   -lessonType: LessonType
@@ -113,11 +129,11 @@ class InstructorQualification {
   +isValidOn(date: LocalDate): Boolean
 }
 
-class Skill {
+class ClientSkill {
   -id: UUID
   -code: String
   -name: String
-  -category: SkillCategory
+  -category: ClientSkillCategory
   -description: String
   +getName(): String
 }
@@ -167,6 +183,7 @@ class LessonSession {
   -isCancelled: Boolean
   +hasConflict(): Boolean
   +cancelSession(): void
+  +validateInstructorAvailability(): Boolean
 }
 
 class Booking {
@@ -215,26 +232,41 @@ Instructor "1" *-- "0..*" InstructorAvailability : defines >
 Client "0..1" --> "0..*" Guardian : has guardian >
 Guardian "0..1" <-- "0..*" ContractDocument : signs for minor <
 
-' Skills and qualifications
-Client "0..*" --> "0..*" Skill : mastered skills >
+' Skills and qualifications (Rozdzielone słowniki)
+Client "0..*" --> "0..*" ClientSkill : mastered skills >
 Instructor "1" *-- "0..*" InstructorQualification : holds >
-InstructorQualification "0..*" --> "1" Skill : based on >
+InstructorQualification "0..*" --> "1" InstructorSkill : based on >
 InstructorQualification "0..*" --> "1" LessonType : for lesson type >
 
-' Group membership history
+' Group membership history & Instructor assignment
 Client "1" --> "0..*" GroupMembership : membership history >
 SwimGroup "1" <-- "0..*" GroupMembership : includes <
+Instructor "0..*" --> "0..*" SwimGroup : leads / assigned to >
 
-' Lessons, bookings, and passes
+' Lessons, bookings, passes, and calendar availability validation
+Instructor "0..*" <-- "1" LessonSession : teaches <
+InstructorAvailability "0..*" <-- "0..1" LessonSession : utilizes slot >
+Facility "0..*" <-- "1" LessonSession : takes place at <
+SwimGroup "0..1" <-- "0..*" LessonSession : scheduled for <
+
 Client "1" <-- "0..*" Booking : makes <
 LessonSession "1" <-- "0..*" Booking : refers to <
 Pass "0..1" <-- "0..*" Booking : uses pass <
 Client "1" <-- "0..*" Pass : owns <
 
-' Scheduling and facilities
-Instructor "0..*" <-- "1" SwimGroup : leads <
-Instructor "0..*" <-- "1" LessonSession : teaches <
-Facility "0..*" <-- "1" LessonSession : takes place at <
-SwimGroup "0..1" <-- "0..*" LessonSession : scheduled for <
+' Enum Bindings (Jawne powiązania słowników z klasami)
+StaffMember ..> StaffRole
+Client ..> ClientStatus
+Client ..> SkillLevel
+SwimGroup ..> SkillLevel
+InstructorQualification ..> SkillLevel
+ClientSkill ..> ClientSkillCategory
+InstructorSkill ..> InstructorSkillCategory
+Instructor ..> LessonType
+InstructorQualification ..> LessonType
+LessonSession ..> LessonType
+Pass ..> PassStatus
+Booking ..> BookingStatus
+GroupMembership ..> MembershipStatus
 
 @enduml
