@@ -29,9 +29,7 @@ rectangle "System Szkółki Pływackiej" {
 
   ' --- Administrator ---
   usecase "Zarządzaj karnetami\n(zamroź, przedłuż)" as UC12
-  usecase "Zarządzaj stawkami instruktorów" as UC13
   usecase "Zarządzaj kwalifikacjami instruktorów" as UC14
-  usecase "Generuj listy płac" as UC15
   usecase "Zarządzaj obiektami i torami basenowymi" as UC16
   usecase "Zarządzaj umowami" as UC17
   usecase "Zarządzaj kontami użytkowników" as UC18
@@ -61,9 +59,7 @@ I -- UC11
 
 A -- UC11
 A -- UC12
-A -- UC13
 A -- UC14
-A -- UC15
 A -- UC16
 A -- UC17
 A -- UC18
