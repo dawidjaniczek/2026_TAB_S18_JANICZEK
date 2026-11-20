@@ -1,2 +1,22 @@
+# Hasła
 .env
+
+# Visual Studio / edytory
+.vs/
+.vscode/
+*.user
+*.suo
+
+# Frontend (Node / Vite)
+frontend/node_modules/
+frontend/dist/
+
+# Backend (Python)
+backend/.venv/
+backend/__pycache__/
+*.pyc
+.pytest_cache/
+
+# Systemowe
 .DS_Store
+Thumbs.db

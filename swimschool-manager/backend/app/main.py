@@ -1,0 +1,1 @@
+#Punkt startowy FastAPI + CORS
