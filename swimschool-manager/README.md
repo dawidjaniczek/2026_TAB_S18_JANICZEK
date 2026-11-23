@@ -13,27 +13,28 @@ Zanim uruchomisz projekt lokalnie, zainstaluj:
 2. **Python 3.11+**
 3. **Node.js (LTS) + npm**
 
-## Uruchomienie projektu krok po kroku (3 terminale)
+## Uruchomienie projektu krok po kroku (2 terminale)
 
 Wszystkie komendy wykonuj z poziomu folderu `swimschool-manager/`.
 
 ### 1. Aktywacja środowisk: front/back/bd
 1. Skopiuj plik `.env.example` i nazwij jego kopię `.env`.
 2. Uruchom kontenery:
-	TERMINAL 1:
+	- TERMINAL 1:
 ```
    docker compose up -d
    cd backend
    python -m venv .venv
+```
+Aktywacja środowiska wirtualnego:
+	Windows (PowerShell): .\.venv\Scripts\Activate.ps1
+	Windows (CMD): .\.venv\Scripts\activate.bat
+	Linux / macOS: source .venv/bin/activate
+```	
    pip install -r requirements.txt
    uvicorn app.main:app --reload --port 8000
 ```
-Aktywacja środowiska wirtualnego:
-Windows (PowerShell): .\.venv\Scripts\Activate.ps1
-Windows (CMD): .\.venv\Scripts\activate.bat
-Linux / macOS: source .venv/bin/activate
-	
-	TERMINAL 2:
+	- TERMINAL 2:
 ```
    cd frontend
    npm install
@@ -41,15 +42,15 @@ Linux / macOS: source .venv/bin/activate
 ```
 
 ### Poszczególne adresy: 
-http://localhost:5173 - Frontend
-http://localhost:8000/docs - Backend
-http://localhost:8080 - Adminer
+1. http://localhost:5173 - Frontend
+2. http://localhost:8000/docs - Backend
+3. http://localhost:8080 - Adminer
 
 ### KONTA TESTOWE:
-Administrator	admin@1.test	demo_hash_admin
-Recepcja		recepcja@1.test	demo_hash_rec
-Instruktor 1	inst1@1.test	demo_hash_inst1
-Instruktor 2	inst2@1.test	demo_hash_inst2
+- Administrator	admin@1.test	demo_hash_admin
+- Recepcja		recepcja@1.test	demo_hash_rec
+- Instruktor 1	inst1@1.test	demo_hash_inst1
+- Instruktor 2	inst2@1.test	demo_hash_inst2
 
 ### Przydatne komendy :) 
 ```
