@@ -1,1 +1,82 @@
---Dane testowe (kilka rekordow kazdej tabeli--
+--1. Uzytkownicy, personel i instruktorzy
+INSERT INTO "users" ("id", "email", "password_hash", "first_name", "last_name", "phone") VALUES
+('00000000-0000-0000-0000-000000000001', 'admin@1.test', 'demo_hash_admin', 'Adam', 'Kowalczyk', '500100101'),
+('00000000-0000-0000-0000-000000000002', 'recepcja@1.test', 'demo_hash_rec', 'Ewa', 'Kamińska', '500100102'),
+('00000000-0000-0000-0000-000000000011', 'inst1@1.test', 'demo_hash_inst1', 'Jan', 'Kowalski', '500200201'),
+('00000000-0000-0000-0000-000000000012', 'inst2@1.test', 'demo_hash_inst2', 'Marta', 'Zielińska', '500200202');
+
+INSERT INTO "staff_members" ("id", "staff_role") VALUES
+('00000000-0000-0000-0000-000000000001', 'ADMIN'),
+('00000000-0000-0000-0000-000000000002', 'RECEPTION');
+
+INSERT INTO "instructors" ("id") VALUES
+('00000000-0000-0000-0000-000000000011'),
+('00000000-0000-0000-0000-000000000012');
+
+--2. Klienci (kursanci) i opiekunowie
+INSERT INTO "clients" ("id", "first_name", "last_name", "email", "phone", "birth_date", "skill_level", "status", "notes") VALUES
+('10000000-0000-0000-0000-000000000001', 'Tomasz', 'Nowak', 'klient1@1.test', '500300301', '2017-05-14', 'BEGINNER', 'ACTIVE', 'Oswajanie z wodą, preferuje zajęcia popołudniowe'),
+('10000000-0000-0000-0000-000000000002', 'Zofia', 'Nowak', NULL, '500300301', '2019-09-22', 'BEGINNER', 'ACTIVE', 'Kontakt przez opiekuna'),
+('10000000-0000-0000-0000-000000000003', 'Kamil', 'Wiśniewski', 'klient3@1.test', '500300302', '1998-03-10', 'INTERMEDIATE', 'ACTIVE', NULL);
+
+INSERT INTO "guardians" ("id", "first_name", "last_name", "phone", "email") VALUES
+('20000000-0000-0000-0000-000000000001', 'Anna', 'Nowak', '500300301', 'opiekun1@1.test'),
+('20000000-0000-0000-0000-000000000002', 'Marek', 'Nowak', '500300309', 'opiekun2@1.test');
+
+INSERT INTO "client_guardians" ("client_id", "guardians_id") VALUES
+('10000000-0000-0000-0000-000000000001', '20000000-0000-0000-0000-000000000001'),
+('10000000-0000-0000-0000-000000000002', '20000000-0000-0000-0000-000000000001'),
+('10000000-0000-0000-0000-000000000001', '20000000-0000-0000-0000-000000000002');
+
+--3. Uprawnienia i kwalifikacje instruktorow
+INSERT INTO "instructor_skills" ("id", "code", "name", "category", "description") VALUES
+('30000000-0000-0000-0000-000000000001', 'CERT_SWIM', 'Instruktor Pływania', 'CERTIFICATION', 'Uprawnienia do prowadzenia nauki pływania'),
+('30000000-0000-0000-0000-000000000002', 'CERT_AQUA', 'Instruktor Aquaaerobiku', 'CERTIFICATION', 'Certyfikat zajęć fitness w wodzie'),
+('30000000-0000-0000-0000-000000000003', 'LIFE_WOPR', 'Ratownik Wodny', 'LIFEGUARDIAN', 'Aktualne uprawnienia ratownika wodnego');
+
+INSERT INTO "instructor_qualifications" ("id", "instructor_id", "instructor_skill_id", "lesson_type", "skill_level", "valid_from", "valid_until") VALUES
+('32000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000011', '30000000-0000-0000-0000-000000000001', 'GROUP', 'BEGINNER', '2024-01-01', '2028-12-31'),
+('32000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000011', '30000000-0000-0000-0000-000000000003', 'INDIVIDUAL', 'ADVANCED', '2025-01-01', '2027-12-31'),
+('32000000-0000-0000-0000-000000000003', '00000000-0000-0000-0000-000000000012', '30000000-0000-0000-0000-000000000002', 'AQUAAEROBICS', 'INTERMEDIATE', '2025-06-01', '2028-06-01');
+
+--4. Dostepnosc instruktorow, obiekty i grupy
+INSERT INTO "instructor_availabilities" ("id", "instructor_id", "date", "start_time", "end_time", "is_available") VALUES
+('40000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000011', '2026-11-25', '16:00:00', '19:00:00', TRUE),
+('40000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000011', '2026-11-26', '17:00:00', '20:00:00', TRUE),
+('40000000-0000-0000-0000-000000000003', '00000000-0000-0000-0000-000000000012', '2026-11-25', '18:00:00', '21:00:00', TRUE);
+
+INSERT INTO "facilities" ("id", "name", "address", "city") VALUES
+('50000000-0000-0000-0000-000000000001', 'Pływalnia Centralna', 'ul. Sportowa 10', 'Miasto A'),
+('50000000-0000-0000-0000-000000000002', 'Pływalnia Północna', 'ul. Wodna 5', 'Miasto A');
+
+INSERT INTO "swim_groups" ("id", "name", "target_skill_level", "min_age", "max_age", "max_participants") VALUES
+('60000000-0000-0000-0000-000000000001', 'Grupa Początkująca A', 'BEGINNER', 6, 10, 8),
+('60000000-0000-0000-0000-000000000002', 'Aquaaerobik Wieczór', 'INTERMEDIATE', 18, 65, 12);
+
+INSERT INTO "instructor_swim_groups" ("instructor_id", "swim_group_id") VALUES
+('00000000-0000-0000-0000-000000000011', '60000000-0000-0000-0000-000000000001'),
+('00000000-0000-0000-0000-000000000012', '60000000-0000-0000-0000-000000000002');
+
+INSERT INTO "group_memberships" ("id", "client_id", "swim_group_id", "joined_at", "left_at", "status") VALUES
+('61000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000001', '60000000-0000-0000-0000-000000000001', '2026-10-01', NULL, 'ACTIVE'),
+('61000000-0000-0000-0000-000000000002', '10000000-0000-0000-0000-000000000002', '60000000-0000-0000-0000-000000000001', '2026-10-01', NULL, 'ACTIVE'),
+('61000000-0000-0000-0000-000000000003', '10000000-0000-0000-0000-000000000003', '60000000-0000-0000-0000-000000000002', '2026-11-01', NULL, 'ACTIVE');
+
+--5. Zajecia (45 min), karnety, rezerwacje i umowy
+INSERT INTO "lesson_sessions" ("id", "instructor_id", "facility_id", "swim_group_id", "instructor_availability_id", "start_time", "duration_minutes", "type", "is_cancelled") VALUES
+('70000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000011', '50000000-0000-0000-0000-000000000001', NULL, '40000000-0000-0000-0000-000000000001', '2026-11-25 17:00:00', 45, 'INDIVIDUAL', FALSE),
+('70000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000011', '50000000-0000-0000-0000-000000000001', '60000000-0000-0000-0000-000000000001', '40000000-0000-0000-0000-000000000001', '2026-11-25 18:00:00', 45, 'GROUP', FALSE),
+('70000000-0000-0000-0000-000000000003', '00000000-0000-0000-0000-000000000012', '50000000-0000-0000-0000-000000000002', '60000000-0000-0000-0000-000000000002', '40000000-0000-0000-0000-000000000003', '2026-11-25 19:00:00', 45, 'AQUAAEROBICS', FALSE);
+
+INSERT INTO "passes" ("id", "client_id", "total_lessons", "used_lessons", "valid_from", "valid_until", "status") VALUES
+('80000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000001', 10, 6, '2026-10-01', '2026-12-31', 'ACTIVE'),
+('80000000-0000-0000-0000-000000000002', '10000000-0000-0000-0000-000000000003', 8, 2, '2026-11-01', '2027-01-31', 'ACTIVE');
+
+INSERT INTO "bookings" ("id", "client_id", "lesson_session_id", "pass_id", "booked_at", "status") VALUES
+('81000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000001', '70000000-0000-0000-0000-000000000001', '80000000-0000-0000-0000-000000000001', '2026-11-20 14:30:00', 'BOOKED'),
+('81000000-0000-0000-0000-000000000002', '10000000-0000-0000-0000-000000000002', '70000000-0000-0000-0000-000000000002', NULL, '2026-11-20 15:00:00', 'BOOKED'),
+('81000000-0000-0000-0000-000000000003', '10000000-0000-0000-0000-000000000003', '70000000-0000-0000-0000-000000000003', '80000000-0000-0000-0000-000000000002', '2026-11-21 10:15:00', 'ATTENDED');
+
+INSERT INTO "contract_documents" ("id", "client_id", "guardian_id", "title", "template_url", "signed_file_url", "is_signed", "generated_at") VALUES
+('90000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000001', '20000000-0000-0000-0000-000000000001', 'Umowa_Nauka_Plywania_2026.pdf', '/templates/umowa_dziecko.pdf', '/signed/tomasz_nowak.pdf', TRUE, '2026-10-01 12:00:00'),
+('90000000-0000-0000-0000-000000000002', '10000000-0000-0000-0000-000000000003', NULL, 'Umowa_Dorosly_2026.pdf', '/templates/umowa_dorosly.pdf', NULL, FALSE, '2026-11-01 09:30:00');

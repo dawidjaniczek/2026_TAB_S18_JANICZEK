@@ -393,6 +393,12 @@ button {
         margin: 15px 0 8px;
     }
 
+.dashboard-content h2 {
+        font-family: 'Manrope', sans-serif;
+        font-size: 20px;
+        color: #0f172a;
+    }
+
 .dashboard-description {
     color: #7b909f;
     margin-bottom: 45px;
