@@ -1,7 +1,14 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import './App.css'
 import { api } from './api/client'
 import { BookingsTable } from './components/BookingsTable'
+import { PanelView } from './components/panels/PanelView'
+import {
+  MODULES_BY_ROLE,
+  getModuleFromPath,
+  getModulePath,
+  type DashboardModule,
+} from './components/panels/moduleConfig'
 import type { AuthUser, UserRole } from './types/api'
 
 const roleNames: Record<UserRole, string> = {
@@ -22,11 +29,45 @@ function getSavedUser(): AuthUser | null {
 
 function App() {
   const [user, setUser] = useState<AuthUser | null>(getSavedUser)
+  const [activeModule, setActiveModule] = useState<DashboardModule | null>(() => {
+    const saved = getSavedUser()
+    return saved ? getModuleFromPath(window.location.pathname, saved.role) : null
+  })
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    const handlePopState = () => {
+      if (!user) {
+        setActiveModule(null)
+        return
+      }
+      setActiveModule(getModuleFromPath(window.location.pathname, user.role))
+    }
+
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [user])
+
+  const openModule = (mod: DashboardModule) => {
+    const targetPath = getModulePath(mod.slug)
+    if (window.location.pathname !== targetPath) {
+      window.history.pushState({ moduleId: mod.id }, '', targetPath)
+    }
+    setActiveModule(mod)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const goHome = () => {
+    if (window.location.pathname !== '/') {
+      window.history.pushState({}, '', '/')
+    }
+    setActiveModule(null)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
   const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -43,6 +84,14 @@ function App() {
       const loggedUser = await api.login(email, password)
       localStorage.setItem('swimschool_user', JSON.stringify(loggedUser))
       setUser(loggedUser)
+      const matchedModule = getModuleFromPath(
+        window.location.pathname,
+        loggedUser.role
+      )
+      setActiveModule(matchedModule)
+      if (!matchedModule && window.location.pathname !== '/') {
+        window.history.replaceState({}, '', '/')
+      }
       setPassword('')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Nie udało się zalogować.')
@@ -54,141 +103,89 @@ function App() {
   const handleLogout = () => {
     localStorage.removeItem('swimschool_user')
     setUser(null)
+    setActiveModule(null)
+    if (window.location.pathname !== '/') {
+      window.history.pushState({}, '', '/')
+    }
     setPassword('')
     setError(null)
   }
 
   if (user) {
+    const roleModules = MODULES_BY_ROLE[user.role]
+
     return (
       <div className="dashboard">
         <header className="topbar">
-          <div className="brand">
+          <button
+            type="button"
+            className="brand brand-button"
+            onClick={goHome}
+            title="Wróć do panelu głównego"
+          >
             <div className="brand-icon">≋</div>
             <div>
               <strong>AQUA MANAGER</strong>
               <span>SYSTEM ZARZĄDZANIA</span>
             </div>
-          </div>
-
-          <button className="logout-button" onClick={handleLogout}>
-            Wyloguj się ↗
           </button>
+
+          <div className="topbar-actions">
+            <span className="topbar-user">
+              {user.first_name} {user.last_name} ({roleNames[user.role]})
+            </span>
+            <button
+              type="button"
+              className="logout-button"
+              onClick={handleLogout}
+            >
+              Wyloguj się ↗
+            </button>
+          </div>
         </header>
 
         <main className="dashboard-content">
-          <div className="welcome-label">PANEL UŻYTKOWNIKA</div>
-          <h1>Witaj, {user.first_name}!</h1>
-          <p className="dashboard-description">
-            Zalogowano jako:{' '}
-            <strong>
-              {user.first_name} {user.last_name} ({roleNames[user.role]})
-            </strong>
-          </p>
+          {activeModule ? (
+            <PanelView
+              user={user}
+              module={activeModule}
+              onBack={goHome}
+              onSelectModule={openModule}
+            />
+          ) : (
+            <>
+              <div className="welcome-label">PANEL UŻYTKOWNIKA</div>
+              <h1>Witaj, {user.first_name}!</h1>
+              <p className="dashboard-description">
+                Zalogowano jako:{' '}
+                <strong>
+                  {user.first_name} {user.last_name} ({roleNames[user.role]})
+                </strong>
+              </p>
 
-          <div className="dashboard-grid">
-            {user.role === 'ADMIN' && (
-              <>
-                <DashboardCard
-                  icon="♙"
-                  title="Użytkownicy"
-                  description="Zarządzaj kontami i uprawnieniami."
-                />
-                <DashboardCard
-                  icon="▦"
-                  title="Grupy pływackie"
-                  description="Zarządzaj grupami i przydziałami."
-                />
-                <DashboardCard
-                  icon="◷"
-                  title="Harmonogram"
-                  description="Zarządzaj terminami zajęć."
-                />
-                <DashboardCard
-                  icon="▤"
-                  title="Raporty"
-                  description="Przeglądaj dane i statystyki."
-                />
-              </>
-            )}
+              <div className="dashboard-grid">
+                {roleModules.map((mod) => (
+                  <DashboardCard
+                    key={mod.id}
+                    icon={mod.icon}
+                    title={mod.title}
+                    description={mod.description}
+                    onClick={() => openModule(mod)}
+                  />
+                ))}
+              </div>
 
-            {user.role === 'RECEPTION' && (
-              <>
-                <DashboardCard
-                  icon="♙"
-                  title="Kursanci"
-                  description="Zarządzaj kartotekami i opiekunami."
-                />
-                <DashboardCard
-                  icon="◷"
-                  title="Rezerwacje"
-                  description="Obsługuj zapisy i odwołania zajęć."
-                />
-                <DashboardCard
-                  icon="▤"
-                  title="Karnety"
-                  description="Sprawdzaj ważność i liczniki lekcji."
-                />
-                <DashboardCard
-                  icon="✓"
-                  title="Umowy"
-                  description="Zarządzaj dokumentami kursantów."
-                />
-              </>
-            )}
-
-            {user.role === 'INSTRUCTOR' && (
-              <>
-                <DashboardCard
-                  icon="♙"
-                  title="Moje grupy"
-                  description="Przeglądaj przypisane grupy."
-                />
-                <DashboardCard
-                  icon="◷"
-                  title="Harmonogram"
-                  description="Sprawdź swoje nadchodzące zajęcia."
-                />
-                <DashboardCard
-                  icon="✓"
-                  title="Obecności"
-                  description="Zarządzaj obecnością uczestników."
-                />
-                <DashboardCard
-                  icon="▤"
-                  title="Poziomy i uwagi"
-                  description="Przeglądaj poziom i notatki o kursantach."
-                />
-              </>
-            )}
-
-            {user.role === 'USER' && (
-              <>
-                <DashboardCard
-                  icon="♙"
-                  title="Moje konto"
-                  description="Przeglądaj swoje dane."
-                />
-                <DashboardCard
-                  icon="◷"
-                  title="Moje zajęcia"
-                  description="Sprawdź przypisane zajęcia."
-                />
-                <DashboardCard
-                  icon="▤"
-                  title="Informacje"
-                  description="Sprawdź komunikaty szkółki."
-                />
-              </>
-            )}
-          </div>
-
-          {(user.role === 'ADMIN' ||
-            user.role === 'RECEPTION' ||
-            user.role === 'INSTRUCTOR') && (
-            <section style={{ marginTop: '2.5rem' }}>
-              <h2>Bieżące rezerwacje i obecności (dane z bazy PostgreSQL)</h2>
-              <BookingsTable />
-            </section>
+              {(user.role === 'ADMIN' ||
+                user.role === 'RECEPTION' ||
+                user.role === 'INSTRUCTOR') && (
+                <section className="dashboard-bookings-section">
+                  <h2>Bieżące rezerwacje i obecności (dane z bazy PostgreSQL)</h2>
+                  <div className="panel-card">
+                    <BookingsTable />
+                  </div>
+                </section>
+              )}
+            </>
           )}
         </main>
       </div>
@@ -318,18 +315,20 @@ function DashboardCard({
   icon,
   title,
   description,
+  onClick,
 }: {
   icon: string
   title: string
   description: string
+  onClick: () => void
 }) {
   return (
-    <div className="dashboard-card">
+    <button type="button" className="dashboard-card" onClick={onClick}>
       <div className="card-icon">{icon}</div>
       <h3>{title}</h3>
       <p>{description}</p>
       <span className="card-arrow">Otwórz moduł →</span>
-    </div>
+    </button>
   )
 }
 
