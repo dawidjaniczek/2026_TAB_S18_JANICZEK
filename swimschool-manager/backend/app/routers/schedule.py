@@ -24,20 +24,6 @@ def list_facilities():
             return cur.fetchall()
 
 
-@router.get("/instructors")
-def list_instructors():
-    sql = """
-        SELECT u.id, u.first_name, u.last_name, u.email, u.phone
-        FROM instructors i
-        JOIN users u ON u.id = i.id
-        ORDER BY u.last_name, u.first_name;
-    """
-    with get_connection() as conn:
-        with conn.cursor() as cur:
-            cur.execute(sql)
-            return cur.fetchall()
-
-
 @router.get("/groups")
 def list_groups():
     sql = """

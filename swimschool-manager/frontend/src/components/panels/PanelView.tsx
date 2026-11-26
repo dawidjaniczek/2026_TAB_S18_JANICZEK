@@ -30,7 +30,7 @@ function renderModuleContent(moduleId: ModuleId, user: AuthUser) {
 
   switch (moduleId) {
     case "users":
-      return <UsersPanel currentUser={user} />;
+      return <UsersPanel />;
     case "groups":
       return <GroupsPanel heading="Wszystkie grupy pływackie" />;
     case "my-groups":

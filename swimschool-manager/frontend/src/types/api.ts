@@ -4,6 +4,8 @@ export type SkillLevel = "BEGINNER" | "INTERMEDIATE" | "ADVANCED";
 
 export type ClientStatus = "ACTIVE" | "INACTIVE" | "SUSPENDED";
 
+export type PassStatus = "ACTIVE" | "FROZEN" | "EXPIRED" | "FINISHED";
+
 export type LessonType =
   | "INDIVIDUAL"
   | "SEMI_INDIVIDUAL"
@@ -38,6 +40,18 @@ export interface ClientCreatePayload {
   email?: string | null;
   birth_date?: string | null;
   skill_level: SkillLevel;
+  status?: ClientStatus;
+  notes?: string | null;
+}
+
+export interface ClientUpdatePayload {
+  first_name?: string;
+  last_name?: string;
+  phone?: string;
+  email?: string | null;
+  birth_date?: string | null;
+  skill_level?: SkillLevel;
+  status?: ClientStatus;
   notes?: string | null;
 }
 
@@ -54,6 +68,22 @@ export interface InstructorItem {
   last_name: string;
   email: string;
   phone: string;
+}
+
+export interface InstructorCreatePayload {
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone: string;
+  password?: string;
+}
+
+export interface InstructorUpdatePayload {
+  first_name?: string;
+  last_name?: string;
+  email?: string;
+  phone?: string;
+  password?: string;
 }
 
 export interface GroupItem {
@@ -87,12 +117,55 @@ export interface SessionCreatePayload {
 
 export interface PassItem {
   id: string;
+  client_id?: string;
   total_lessons: number;
   used_lessons: number;
   counter: string;
   valid_from: string;
   valid_until: string;
-  status: "ACTIVE" | "FROZEN" | "EXPIRED" | "FINISHED" | string;
+  status: PassStatus;
+}
+
+export interface PassCreatePayload {
+  total_lessons: number;
+  used_lessons?: number;
+  valid_from: string;
+  valid_until: string;
+  status?: PassStatus;
+}
+
+export interface PassUpdatePayload {
+  total_lessons?: number;
+  used_lessons?: number;
+  valid_from?: string;
+  valid_until?: string;
+  status?: PassStatus;
+}
+
+export interface ContractItem {
+  id: string;
+  client_id: string;
+  guardian_id: string | null;
+  guardian_name?: string | null;
+  title: string;
+  template_url: string | null;
+  signed_file_url: string | null;
+  is_signed: boolean;
+  generated_at: string;
+}
+
+export interface ContractCreatePayload {
+  title: string;
+  template_url?: string | null;
+  signed_file_url?: string | null;
+  is_signed?: boolean;
+}
+
+export interface ContractUpdatePayload {
+  title?: string;
+  template_url?: string | null;
+  signed_file_url?: string | null;
+  is_signed?: boolean;
 }
 
 export interface BookingItem {

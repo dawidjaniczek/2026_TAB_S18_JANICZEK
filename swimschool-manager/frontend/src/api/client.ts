@@ -4,10 +4,18 @@ import type {
   BookingItem,
   ClientCreatePayload,
   ClientItem,
+  ClientUpdatePayload,
+  ContractCreatePayload,
+  ContractItem,
+  ContractUpdatePayload,
   FacilityItem,
   GroupItem,
+  InstructorCreatePayload,
   InstructorItem,
+  InstructorUpdatePayload,
+  PassCreatePayload,
   PassItem,
+  PassUpdatePayload,
   SessionCreatePayload,
   SessionItem,
 } from "../types/api";
@@ -46,9 +54,40 @@ export const api = {
       body: JSON.stringify(payload),
     }),
 
+  updateClient: (clientId: string, payload: ClientUpdatePayload) =>
+    request<ClientItem>(`/api/clients/${clientId}`, {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    }),
+
+  deleteClient: (clientId: string) =>
+    request<{ deleted: boolean; id: string }>(`/api/clients/${clientId}`, {
+      method: "DELETE",
+    }),
+
   getFacilities: () => request<FacilityItem[]>("/api/facilities"),
 
   getInstructors: () => request<InstructorItem[]>("/api/instructors"),
+
+  createInstructor: (payload: InstructorCreatePayload) =>
+    request<InstructorItem>("/api/instructors", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+
+  updateInstructor: (instructorId: string, payload: InstructorUpdatePayload) =>
+    request<InstructorItem>(`/api/instructors/${instructorId}`, {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    }),
+
+  deleteInstructor: (instructorId: string) =>
+    request<{ deleted: boolean; id: string }>(
+      `/api/instructors/${instructorId}`,
+      {
+        method: "DELETE",
+      }
+    ),
 
   getGroups: () => request<GroupItem[]>("/api/groups"),
 
@@ -62,6 +101,43 @@ export const api = {
 
   getClientPasses: (clientId: string) =>
     request<PassItem[]>(`/api/clients/${clientId}/passes`),
+
+  createClientPass: (clientId: string, payload: PassCreatePayload) =>
+    request<PassItem>(`/api/clients/${clientId}/passes`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+
+  updatePass: (passId: string, payload: PassUpdatePayload) =>
+    request<PassItem>(`/api/passes/${passId}`, {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    }),
+
+  deletePass: (passId: string) =>
+    request<{ deleted: boolean; id: string }>(`/api/passes/${passId}`, {
+      method: "DELETE",
+    }),
+
+  getClientContracts: (clientId: string) =>
+    request<ContractItem[]>(`/api/clients/${clientId}/contracts`),
+
+  createClientContract: (clientId: string, payload: ContractCreatePayload) =>
+    request<ContractItem>(`/api/clients/${clientId}/contracts`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+
+  updateContract: (contractId: string, payload: ContractUpdatePayload) =>
+    request<ContractItem>(`/api/contracts/${contractId}`, {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    }),
+
+  deleteContract: (contractId: string) =>
+    request<{ deleted: boolean; id: string }>(`/api/contracts/${contractId}`, {
+      method: "DELETE",
+    }),
 
   getBookings: () => request<BookingItem[]>("/api/bookings"),
 

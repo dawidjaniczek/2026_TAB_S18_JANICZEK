@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.db import get_connection
-from app.routers import auth, clients, schedule, bookings
+from app.routers import auth, clients, instructors, schedule, bookings, contracts
 
 app = FastAPI(title="SwimSchool Manager API")
 
@@ -16,8 +16,10 @@ app.add_middleware(
 
 app.include_router(auth.router)
 app.include_router(clients.router)
+app.include_router(instructors.router)
 app.include_router(schedule.router)
 app.include_router(bookings.router)
+app.include_router(contracts.router)
 
 
 @app.get("/api/health", tags=["System"])
